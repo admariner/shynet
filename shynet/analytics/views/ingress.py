@@ -109,22 +109,18 @@ class PixelView(ValidateServiceOriginsMixin, View):
 class ScriptView(ValidateServiceOriginsMixin, View):
     def get(self, *args, **kwargs):
         protocol = "https" if settings.SCRIPT_USE_HTTPS else "http"
-        endpoint = (
-            reverse(
+        endpoint = reverse(
                 "ingress:endpoint_script",
                 kwargs={
                     "service_uuid": self.kwargs.get("service_uuid"),
                 },
-            )
-            if self.kwargs.get("identifier") == None
-            else reverse(
+            ) if self.kwargs.get("identifier") is None else reverse(
                 "ingress:endpoint_script_id",
                 kwargs={
                     "service_uuid": self.kwargs.get("service_uuid"),
                     "identifier": self.kwargs.get("identifier"),
                 },
             )
-        )
         heartbeat_frequency = settings.SCRIPT_HEARTBEAT_FREQUENCY
         return render(
             self.request,
@@ -156,7 +152,7 @@ class ScriptView(ValidateServiceOriginsMixin, View):
     def get_script_inject(self):
         service_uuid = self.kwargs.get("service_uuid")
         script_inject = cache.get(f"script_inject_{service_uuid}")
-        if script_inject == None:
+        if script_inject is None:
             service = Service.objects.get(uuid=service_uuid)
             script_inject = service.script_inject
             cache.set(f"script_inject_{service_uuid}", script_inject, timeout=3600)

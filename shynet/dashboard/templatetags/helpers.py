@@ -64,19 +64,19 @@ def relative_stat_tone(
     bad_classes = bad_classes or "~critical"
     neutral_classes = neutral_classes or "~neutral"
 
-    if start == None or end == None or start == end:
+    if start is None or end is None or start == end:
         return neutral_classes
-    if good == "UP":
-        return good_classes if start <= end else bad_classes
-    elif good == "DOWN":
+    if good == "DOWN":
         return bad_classes if start <= end else good_classes
+    elif good == "UP":
+        return good_classes if start <= end else bad_classes
     else:
         return neutral_classes
 
 
 @register.simple_tag
 def percent_change_display(start, end):
-    if start == None or end == None:
+    if start is None or end is None:
         return SafeString("&Delta; n/a")
     if start == end:
         direction = "&Delta; "
@@ -186,13 +186,12 @@ def iconify(text):
 
 @register.filter
 def urldisplay(url):
-    if url.startswith("http"):
-        display_url = url.replace("http://", "").replace("https://", "")
-        return SafeString(
-            f"<a href='{url}' title='{url}' rel='nofollow' class='flex items-center mr-1 truncate'>{iconify(url)}<span class='truncate'>{escape(display_url)}</span></a>"
-        )
-    else:
+    if not url.startswith("http"):
         return url
+    display_url = url.replace("http://", "").replace("https://", "")
+    return SafeString(
+        f"<a href='{url}' title='{url}' rel='nofollow' class='flex items-center mr-1 truncate'>{iconify(url)}<span class='truncate'>{escape(display_url)}</span></a>"
+    )
 
 
 class ContextualURLNode(template.Node):

@@ -114,4 +114,4 @@ class Command(BaseCommand):
 
             print(f"Created {n} demo hits on {day}!")
 
-        self.stdout.write(self.style.SUCCESS(f"Successfully created demo data!"))
+        self.stdout.write(self.style.SUCCESS('Successfully created demo data!'))

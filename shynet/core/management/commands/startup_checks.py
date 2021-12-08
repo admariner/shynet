@@ -27,10 +27,7 @@ class Command(BaseCommand):
             # No databases are configured (or the dummy one)
             return True
 
-        if executor.migration_plan(executor.loader.graph.leaf_nodes()):
-            return True
-
-        return False
+        return bool(executor.migration_plan(executor.loader.graph.leaf_nodes()))
 
     def handle(self, *args, **options):
         migration = self.check_migrations()

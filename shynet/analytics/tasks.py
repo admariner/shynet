@@ -23,9 +23,9 @@ _geoip2_asn_reader = None
 def _geoip2_lookup(ip):
     global _geoip2_city_reader, _geoip2_asn_reader  # TODO: is there a better way to do global Django vars? Is this thread safe?
     try:
-        if settings.MAXMIND_CITY_DB == None or settings.MAXMIND_ASN_DB == None:
+        if settings.MAXMIND_CITY_DB is None or settings.MAXMIND_ASN_DB is None:
             return None
-        if _geoip2_city_reader == None or _geoip2_asn_reader == None:
+        if _geoip2_city_reader is None or _geoip2_asn_reader is None:
             _geoip2_city_reader = geoip2.database.Reader(settings.MAXMIND_CITY_DB)
             _geoip2_asn_reader = geoip2.database.Reader(settings.MAXMIND_ASN_DB)
         city_results = _geoip2_city_reader.city(ip)
@@ -105,7 +105,7 @@ def ingress_request(
             log.debug("Cannot link to existing session; creating a new one...")
 
             ip_data = _geoip2_lookup(ip)
-            log.debug(f"Found geoip2 data...")
+            log.debug('Found geoip2 data...')
 
             ua = user_agents.parse(user_agent)
             device_type = "OTHER"
@@ -160,19 +160,18 @@ def ingress_request(
         idempotency_path = f"hit_idempotency_{idempotency}"
         hit = None
 
-        if idempotency is not None:
-            if cache.get(idempotency_path) is not None:
-                cache.touch(idempotency_path, settings.SESSION_MEMORY_TIMEOUT)
-                hit = Hit.objects.filter(
-                    pk=cache.get(idempotency_path), session=session
-                ).first()
-                if hit is not None:
-                    # There is an existing hit with an identical idempotency key. That means
-                    # this is a heartbeat.
-                    log.debug("Hit is a heartbeat; updating old hit with new data...")
-                    hit.heartbeats += 1
-                    hit.last_seen = time
-                    hit.save()
+        if idempotency is not None and cache.get(idempotency_path) is not None:
+            cache.touch(idempotency_path, settings.SESSION_MEMORY_TIMEOUT)
+            hit = Hit.objects.filter(
+                pk=cache.get(idempotency_path), session=session
+            ).first()
+            if hit is not None:
+                # There is an existing hit with an identical idempotency key. That means
+                # this is a heartbeat.
+                log.debug("Hit is a heartbeat; updating old hit with new data...")
+                hit.heartbeats += 1
+                hit.last_seen = time
+                hit.save()
 
         if hit is None:
             log.debug("Hit is a page load; creating new hit...")

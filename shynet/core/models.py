@@ -93,14 +93,13 @@ class Service(models.Model):
     def get_ignored_referrer_regex(self):
         if len(self.hide_referrer_regex.strip()) == 0:
             return re.compile(r".^")  # matches nothing
-        else:
-            try:
-                return re.compile(self.hide_referrer_regex)
-            except re.error:
-                # Regexes are validated in the form, but this is an important
-                # fallback to prevent form validation and malformed source
-                # data from causing all service pages to error
-                return re.compile(r".^")
+        try:
+            return re.compile(self.hide_referrer_regex)
+        except re.error:
+            # Regexes are validated in the form, but this is an important
+            # fallback to prevent form validation and malformed source
+            # data from causing all service pages to error
+            return re.compile(r".^")
 
     def get_daily_stats(self):
         return self.get_core_stats(
@@ -234,11 +233,10 @@ class Service(models.Model):
             ).aggregate(time_delta=models.Avg("duration"))["time_delta"]
         except NotSupportedError:
             avg_session_duration = sum(
-                [
-                    (session.last_seen - session.start_time).total_seconds()
-                    for session in sessions
-                ]
+                (session.last_seen - session.start_time).total_seconds()
+                for session in sessions
             ) / max(session_count, 1)
+
         if session_count == 0:
             avg_session_duration = None
 

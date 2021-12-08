@@ -11,10 +11,7 @@ class UserFactory(DjangoModelFactory):
 
     @post_generation
     def password(self, create, extracted, **kwargs):
-        password = (
-            extracted
-            if extracted
-            else factory.Faker(
+        password = extracted or factory.Faker(
                 "password",
                 length=42,
                 special_chars=True,
@@ -22,7 +19,6 @@ class UserFactory(DjangoModelFactory):
                 upper_case=True,
                 lower_case=True,
             ).evaluate(None, None, extra={"locale": None})
-        )
         self.set_password(password)
 
     class Meta:
